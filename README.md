@@ -1,76 +1,36 @@
-# Quiet-Hours-Scheduler
-A web app where authenticated users can schedule silent study blocks. Each user receives an email notification 10 minutes before their block begins.
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-🚀 Tech Stack
-Next.js (frontend + API routes)
-Supabase Auth (user authentication)
-MongoDB Atlas (data persistence)
-Supabase Functions / Vercel CRON Jobs (scheduled tasks)
-Email: Supabase SMTP or Nodemailer
+## Getting Started
 
-✨ Features
-🔑 Authentication – Secure login via Supabase.
-📅 Quiet Block Scheduling – Users create time blocks for silent study.
-🚫 No Overlaps – Validation prevents multiple overlapping blocks per user.
-⏰ Email Reminder – Sent 10 minutes before a block starts.
-⚡ CRON Automation – Scheduled function checks upcoming blocks and sends reminders.
-🌐 Deployment Ready – Next.js on Vercel + MongoDB Atlas.
+First, run the development server:
 
-🗄️ Database Models
-MongoDB Collections:
-
-users:
-{
-  "_id": "ObjectId",
-  "supabaseId": "uuid",
-  "email": "string"
-}
-
-quiet_blocks:
-{
-  "_id": "ObjectId",
-  "userId": "uuid",
-  "startTime": "Date",
-  "endTime": "Date",
-  "createdAt": "Date",
-  "notified": "boolean"
-}
-
-⚙️ System Flow
-User logs in with Supabase.
-User schedules a quiet block → saved in MongoDB.
-CRON job runs every minute:
-Finds blocks starting in 10 minutes.
-Checks notified: false.
-Sends email → updates block with notified: true.
-
-🔧 Setup
-Clone repo & install dependencies:
-git clone <repo-url>
-cd quiet-hours-scheduler
-npm install
-
-Create .env.local:
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-MONGODB_URI=your_mongodb_uri
-EMAIL_USER=your_email_user
-EMAIL_PASS=your_email_pass
-
-
-Run locally:
+```bash
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-Deploy:
-Frontend/API → Render.
-DB → MongoDB Atlas.
-CRON → Vercel Scheduled Function or Supabase Edge Function.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-📬 Email Notification Example
-Subject: Quiet Hours Reminder
-Body: Your quiet block starts in 10 minutes. Time to get focused!
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-✅ Roadmap (2 Days)
-Day 1: Auth, MongoDB schema, API routes, block creation/listing.
-Day 2: CRON job, email notifications, polish UI, deploy.
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
