@@ -1,31 +1,32 @@
 "use client";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import { useRouter } from "next/navigation";
+import QuietBlockForm from "@/components/QuietBlockForm";
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [blocks, setBlocks] = useState([]);
+
+  const fetchBlocks = async () => {
+    const res = await fetch("/api/blocks/index");
+    const data = await res.json();
+    setBlocks(data);
+  };
 
   useEffect(() => {
-    const session = supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) {
-        router.push("/login"); // redirect if not logged in
-      } else {
-        setUser(data.session.user);
-      }
-    });
+    fetchBlocks();
   }, []);
 
-  if (!user) return <div>Loading...</div>;
-
   return (
-    <div>
-      <h1>Welcome, {user.email}</h1>
-      <p>Your quiet blocks will appear here.</p>
-      <button onClick={() => supabase.auth.signOut().then(() => router.push("/login"))}>
-        Logout
-      </button>
+    <div className="p-8">
+      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+      <QuietBlockForm />
+      <h2 className="text-xl mt-6 mb-2">Upcoming Blocks</h2>
+      <ul>
+        {blocks.map((block: any) => (
+          <li key={block._id}>
+            {new Date(block.startTime).toLocaleString()} — {block.duration} mins
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
