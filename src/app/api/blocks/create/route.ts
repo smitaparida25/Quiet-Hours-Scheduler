@@ -25,9 +25,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Block overlaps with existing one" }, { status: 409 });
     }
 
-    await blocks.insertOne({ userId, userEmail, startTime: start, endTime: end, duration, notified: false });
+    const result = await blocks.insertOne({ userId, userEmail, startTime: start, endTime: end, duration, notified: false });
 
-    return NextResponse.json({ message: "Block created successfully" }, { status: 201 });
+    const createdBlock = {
+      _id: result.insertedId,
+      userId,
+      userEmail,
+      startTime: start,
+      endTime: end,
+      duration,
+      notified: false,
+    };
+
+    return NextResponse.json({ message: "Block created successfully", block: createdBlock }, { status: 201 });
   } catch (err: any) {
     console.error("Error creating block:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });

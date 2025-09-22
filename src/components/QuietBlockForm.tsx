@@ -1,13 +1,18 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { useRouter } from "next/navigation";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Button } from "./ui/button";
 
-export default function QuietBlockForm() {
+type QuietBlockFormProps = {
+  onCreated?: (block: any) => void;
+};
+
+export default function QuietBlockForm({ onCreated }: QuietBlockFormProps) {
   const [startTime, setStartTime] = useState("");
   const [duration, setDuration] = useState(60); // default 60 mins
   const [error, setError] = useState("");
-  const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
@@ -40,10 +45,12 @@ export default function QuietBlockForm() {
     });
 
     if (res.ok) {
-      // Reset form or redirect/re-render blocks
+      const data = await res.json();
       setStartTime("");
       setDuration(60);
-      router.refresh(); // refresh to show new block
+      if (onCreated && data?.block) {
+        onCreated(data.block);
+      }
     } else {
       const data = await res.json();
       setError(data.error || "Something went wrong");
@@ -51,35 +58,33 @@ export default function QuietBlockForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3 p-4 border rounded">
-      <label>
-        Start Time:
-        <input
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-4 border rounded-md">
+      <div className="grid gap-2">
+        <Label htmlFor="startTime">Start Time</Label>
+        <Input
+          id="startTime"
           type="datetime-local"
           value={startTime}
           onChange={(e) => setStartTime(e.target.value)}
-          className="border p-1 rounded w-full"
           required
         />
-      </label>
+      </div>
 
-      <label>
-        Duration (minutes):
-        <input
+      <div className="grid gap-2">
+        <Label htmlFor="duration">Duration (minutes)</Label>
+        <Input
+          id="duration"
           type="number"
           value={duration}
           onChange={(e) => setDuration(Number(e.target.value))}
-          className="border p-1 rounded w-full"
           min={1}
           required
         />
-      </label>
+      </div>
 
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="text-destructive">{error}</p>}
 
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-        Create Quiet Block
-      </button>
+      <Button type="submit">Create Quiet Block</Button>
     </form>
   );
 }

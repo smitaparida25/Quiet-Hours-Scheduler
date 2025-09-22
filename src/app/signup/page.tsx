@@ -1,6 +1,9 @@
 "use client";
+
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -36,22 +39,27 @@ const handleSignup = async (e: React.FormEvent) => {
 
 
   return (
-    <form onSubmit={handleSignup}>
-      <input
+    <form onSubmit={handleSignup} className="space-y-4 w-full max-w-sm mx-auto mt-24">
+      <Input
         type="email"
         placeholder="Email"
         value={email}
-        onChange={e => setEmail(e.target.value)}
+        onChange={(e) => setEmail(e.target.value)}
       />
-      <input
+      <Input
         type="password"
         placeholder="Password"
         value={password}
-        onChange={e => setPassword(e.target.value)}
+        onChange={(e) => setPassword(e.target.value)}
       />
-      <button type="submit">Sign Up</button>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {message && <p style={{ color: "green" }}>{message}</p>}
+      <Button type="submit" className="w-full">
+        Sign Up
+      </Button>
+      <p className="text-sm text-muted-foreground text-center">
+        Already have an account? <a className="underline" href="/login">Log in</a>
+      </p>
+      {error && <p className="text-red-500">{error}</p>}
+      {message && <p className="text-green-500">{message}</p>}
     </form>
   );
 }
