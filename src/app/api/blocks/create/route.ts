@@ -3,10 +3,10 @@ import clientPromise from "@/lib/mongodb";
 
 export async function POST(req: NextRequest) {
   try {
-    const { startTime, duration } = await req.json();
+    const { userEmail, startTime, duration, userId } = await req.json();
 
-    if (!startTime || !duration) {
-      return NextResponse.json({ error: "Missing startTime or duration" }, { status: 400 });
+    if (!startTime || !duration || !userId) {
+      return NextResponse.json({ error: "Missing startTime or duration or userId" }, { status: 400 });
     }
 
     const client = await clientPromise;
@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
     const end = new Date(start.getTime() + duration * 60000);
 
     const overlap = await blocks.findOne({
+      userId,
       $or: [{ startTime: { $lt: end }, endTime: { $gt: start } }],
     });
 
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Block overlaps with existing one" }, { status: 409 });
     }
 
-    await blocks.insertOne({ startTime: start, endTime: end, duration });
+    await blocks.insertOne({ userId, userEmail, startTime: start, endTime: end, duration, notified: false });
 
     return NextResponse.json({ message: "Block created successfully" }, { status: 201 });
   } catch (err: any) {

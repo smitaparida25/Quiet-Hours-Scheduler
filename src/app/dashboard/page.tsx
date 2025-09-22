@@ -1,19 +1,27 @@
 "use client";
 import { useEffect, useState } from "react";
 import QuietBlockForm from "@/components/QuietBlockForm";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function DashboardPage() {
-  const [blocks, setBlocks] = useState([]);
-
-  const fetchBlocks = async () => {
-    const res = await fetch("/api/blocks/index");
-    const data = await res.json();
-    setBlocks(data);
-  };
+  const [blocks, setBlocks] = useState<any[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchBlocks();
+    supabase.auth.getUser().then(({ data }) => {
+      setUserId(data?.user?.id ?? null);
+    });
   }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+    const fetchBlocks = async () => {
+      const res = await fetch(`/api/blocks/index?userId=${userId}`);
+      const data = await res.json();
+      setBlocks(Array.isArray(data) ? data : []);
+    };
+    fetchBlocks();
+  }, [userId]);
 
   return (
     <div className="p-8">

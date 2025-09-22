@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
@@ -8,16 +8,35 @@ export default function QuietBlockForm() {
   const [duration, setDuration] = useState(60); // default 60 mins
   const [error, setError] = useState("");
   const router = useRouter();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id ?? null);
+      setUserEmail(user?.email ?? null);
+    };
+    getUser();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-
-    // Call your API route to create the block
+    if (!userId || !userEmail) {
+      setError("You must be logged in to create a block.");
+      return;
+    }
+    const payload = {
+      startTime,
+      duration,
+      userId,
+      userEmail,
+    };
     const res = await fetch("/api/blocks/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ startTime, duration }),
+      body: JSON.stringify(payload),
     });
 
     if (res.ok) {
