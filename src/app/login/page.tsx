@@ -48,7 +48,7 @@ export default function LoginPage() {
       </div>
       <Button type="submit" className="w-full">Login</Button>
       <p className="text-sm text-muted-foreground text-center">
-        Don't have an account? <a className="underline" href="/signup">Sign up</a>
+        Don&apos;t have an account? <a className="underline" href="/signup">Sign up</a>
       </p>
       {error && <p className="text-destructive">{error}</p>}
     </form>

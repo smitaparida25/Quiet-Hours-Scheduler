@@ -1,4 +1,4 @@
-import clientPromise from "./mongodb.ts";
+import clientPromise from "./mongodb";
 import nodemailer from 'nodemailer';
 
 export async function sendReminderEmails() {
@@ -27,7 +27,7 @@ export async function sendReminderEmails() {
             from: process.env.EMAIL_USER,
             to: block.userEmail,
             subject: 'Your Quiet Block is Starting Soon',
-            text: `Hey! Your quiet block "${block.title}" starts at ${block.startTime.toLocaleTimeString()}.`
+            text: `Hey! Your quiet block starts at ${new Date(block.startTime).toLocaleTimeString()}.`
         });
 
         console.log(`Reminder sent to ${block.userEmail}`);

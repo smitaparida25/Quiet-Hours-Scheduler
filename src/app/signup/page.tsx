@@ -24,7 +24,7 @@ const handleSignup = async (e: React.FormEvent) => {
     return;
   }
 
-  const { data, error } = await supabase.auth.signUp({
+  const { error } = await supabase.auth.signUp({
     email: trimmedEmail,
     password,
   });

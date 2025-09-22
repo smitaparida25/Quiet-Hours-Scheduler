@@ -5,8 +5,18 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 
+type Block = {
+  _id: unknown;
+  userId: string;
+  userEmail?: string;
+  startTime: string | Date;
+  endTime?: string | Date;
+  duration: number;
+  notified?: boolean;
+};
+
 type QuietBlockFormProps = {
-  onCreated?: (block: any) => void;
+  onCreated?: (block: Block) => void;
 };
 
 export default function QuietBlockForm({ onCreated }: QuietBlockFormProps) {
