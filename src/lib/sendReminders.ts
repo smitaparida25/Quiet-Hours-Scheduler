@@ -1,5 +1,25 @@
 import clientPromise from "./mongodb";
 import nodemailer from 'nodemailer';
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+const SECRET_TOKEN = process.env.CRON_SECRET;
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    const token = req.query.token;
+    if (token !== SECRET_TOKEN) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    try {
+        const result = await sendReminderEmails();
+        console.log("Cron ran at", new Date().toISOString(), result);
+        return res.status(200).json(result);
+    } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error("Cron error:", message);
+        return res.status(500).json({ error: message });
+    }
+}
 
 export async function sendReminderEmails() {
     const client = await clientPromise;
