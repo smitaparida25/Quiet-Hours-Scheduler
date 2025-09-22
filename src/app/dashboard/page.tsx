@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 type Block = {
-  _id: unknown;
+  _id: string;
   userId: string;
   userEmail?: string;
   startTime: string | Date;
@@ -31,7 +31,15 @@ export default function DashboardPage() {
     const fetchBlocks = async () => {
       const res = await fetch(`/api/blocks/index?userId=${userId}`);
       const data: unknown = await res.json();
-      setBlocks(Array.isArray(data) ? (data as Block[]) : []);
+      if (Array.isArray(data)) {
+        const normalized = data.map((b: any) => ({
+          ...b,
+          _id: typeof b._id === "object" && b._id && "$oid" in b._id ? (b._id.$oid as string) : String(b._id),
+        })) as Block[];
+        setBlocks(normalized);
+      } else {
+        setBlocks([]);
+      }
     };
     fetchBlocks();
   }, [userId]);
@@ -53,7 +61,15 @@ export default function DashboardPage() {
       <QuietBlockForm
         onCreated={(block) => {
           setBlocks((prev) => {
-            const next = [...prev, block];
+            const normalized: Block = {
+              ...block,
+              _id:
+                typeof (block as any)._id === "object" && (block as any)._id && "$oid" in (block as any)._id
+                  ? ((block as any)._id.$oid as string)
+                  : String((block as any)._id),
+              startTime: block.startTime,
+            } as Block;
+            const next = [...prev, normalized];
             return next.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
           });
         }}
@@ -67,7 +83,7 @@ export default function DashboardPage() {
         <ul className="grid gap-3">
           {blocks.map((block) => (
             <li
-              key={String(block._id)}
+              key={block._id}
               className="border rounded-md p-4 flex items-center justify-between"
             >
               <div className="space-y-1">
