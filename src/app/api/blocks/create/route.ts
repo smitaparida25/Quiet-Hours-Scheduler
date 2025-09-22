@@ -3,7 +3,12 @@ import clientPromise from "@/lib/mongodb";
 
 export async function POST(req: NextRequest) {
   try {
-    const { userEmail, startTime, duration, userId } = await req.json();
+    const { userEmail, startTime, duration, userId } = (await req.json()) as {
+      userEmail?: string
+      startTime?: string
+      duration?: number
+      userId?: string
+    };
 
     if (!startTime || !duration || !userId) {
       return NextResponse.json({ error: "Missing startTime or duration or userId" }, { status: 400 });
@@ -14,7 +19,7 @@ export async function POST(req: NextRequest) {
     const blocks = db.collection("blocks");
 
     const start = new Date(startTime);
-    const end = new Date(start.getTime() + duration * 60000);
+    const end = new Date(start.getTime() + (duration as number) * 60000);
 
     const overlap = await blocks.findOne({
       userId,

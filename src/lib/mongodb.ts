@@ -2,7 +2,10 @@ import { MongoClient } from "mongodb";
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
-const uri = process.env.MONGODB_URI!;
+const uri = process.env.MONGODB_URI;
+if (!uri) {
+  throw new Error("MONGODB_URI is not set. Add it to your environment variables.");
+}
 let client: MongoClient;
 const clientPromise: Promise<MongoClient> = (async () => {
   if (!global._mongoClientPromise) {
