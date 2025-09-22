@@ -42,28 +42,40 @@ export default function QuietBlockForm({ onCreated }: QuietBlockFormProps) {
       setError("You must be logged in to create a block.");
       return;
     }
+
+    const parsed = new Date(startTime);
+    if (Number.isNaN(parsed.getTime())) {
+      setError("Please provide a valid start time.");
+      return;
+    }
+
     const payload = {
-      startTime,
+      startTime: parsed.toISOString(),
       duration,
       userId,
       userEmail,
     };
-    const res = await fetch("/api/blocks/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch("/api/blocks/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    if (res.ok) {
-      const data = await res.json();
-      setStartTime("");
-      setDuration(60);
-      if (onCreated && data?.block) {
-        onCreated(data.block);
+      if (res.ok) {
+        const data = await res.json();
+        setStartTime("");
+        setDuration(60);
+        if (onCreated && data?.block) {
+          onCreated(data.block);
+        }
+      } else {
+        let data: any = null;
+        try { data = await res.json(); } catch {}
+        setError((data && data.error) || "Something went wrong");
       }
-    } else {
-      const data = await res.json();
-      setError(data.error || "Something went wrong");
+    } catch (err) {
+      setError("Network error. Please try again.");
     }
   };
 

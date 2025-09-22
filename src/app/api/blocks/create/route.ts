@@ -23,7 +23,8 @@ export async function POST(req: NextRequest) {
 
     const overlap = await blocks.findOne({
       userId,
-      $or: [{ startTime: { $lt: end }, endTime: { $gt: start } }],
+      startTime: { $lt: end },
+      endTime: { $gt: start },
     });
 
     if (overlap) {
