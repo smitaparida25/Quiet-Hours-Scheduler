@@ -67,7 +67,7 @@ export default function DashboardPage() {
         <ul className="grid gap-3">
           {blocks.map((block) => (
             <li
-              key={block._id}
+              key={String(block._id)}
               className="border rounded-md p-4 flex items-center justify-between"
             >
               <div className="space-y-1">
