@@ -15,6 +15,15 @@ type Block = {
   notified?: boolean;
 };
 
+// Shape returned by the API for a block document
+type ApiBlock = Omit<Block, "_id"> & {
+  _id: string | { $oid: string };
+};
+
+function getStringId(id: string | { $oid: string }): string {
+  return typeof id === "string" ? id : id.$oid;
+}
+
 export default function DashboardPage() {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
@@ -32,9 +41,9 @@ export default function DashboardPage() {
       const res = await fetch(`/api/blocks/index?userId=${userId}`);
       const data: unknown = await res.json();
       if (Array.isArray(data)) {
-        const normalized = data.map((b: any) => ({
+        const normalized = (data as ApiBlock[]).map((b) => ({
           ...b,
-          _id: typeof b._id === "object" && b._id && "$oid" in b._id ? (b._id.$oid as string) : String(b._id),
+          _id: getStringId(b._id),
         })) as Block[];
         setBlocks(normalized);
       } else {
@@ -59,14 +68,22 @@ export default function DashboardPage() {
         </Button>
       </div>
       <QuietBlockForm
-        onCreated={(block) => {
+        onCreated={(block: {
+          _id: unknown;
+          userId: string;
+          userEmail?: string;
+          startTime: string | Date;
+          endTime?: string | Date;
+          duration: number;
+          notified?: boolean;
+        }) => {
           setBlocks((prev) => {
             const normalized: Block = {
               ...block,
               _id:
-                typeof (block as any)._id === "object" && (block as any)._id && "$oid" in (block as any)._id
-                  ? ((block as any)._id.$oid as string)
-                  : String((block as any)._id),
+                typeof block._id === "object" && block._id !== null && "$oid" in (block._id as Record<string, unknown>)
+                  ? (block._id as { $oid: string }).$oid
+                  : String(block._id),
               startTime: block.startTime,
             } as Block;
             const next = [...prev, normalized];
@@ -81,9 +98,9 @@ export default function DashboardPage() {
         </div>
       ) : (
         <ul className="grid gap-3">
-          {blocks.map((block) => (
+          {blocks.map((block: Block) => (
             <li
-              key={block._id}
+              key={String(block._id)}
               className="border rounded-md p-4 flex items-center justify-between"
             >
               <div className="space-y-1">

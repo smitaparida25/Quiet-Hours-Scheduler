@@ -38,9 +38,10 @@ export async function POST(req: NextRequest) {
     };
 
     return NextResponse.json({ message: "Block created successfully", block: createdBlock }, { status: 201 });
-  } catch (err: any) {
-    console.error("Error creating block:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("Error creating block:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
