@@ -24,9 +24,15 @@ const handleSignup = async (e: React.FormEvent) => {
     return;
   }
 
+  const siteUrlEnv = process.env.NEXT_PUBLIC_SITE_URL;
+  const runtimeOrigin = typeof window !== "undefined" ? window.location.origin : undefined;
+  const baseUrl = siteUrlEnv || runtimeOrigin;
+  const emailRedirectTo = baseUrl ? `${baseUrl}/login` : undefined;
+
   const { error } = await supabase.auth.signUp({
     email: trimmedEmail,
     password,
+    options: { emailRedirectTo },
   });
 
   if (error) {

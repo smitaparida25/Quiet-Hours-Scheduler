@@ -4,6 +4,18 @@ import QuietBlockForm from "@/components/QuietBlockForm";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type Block = {
   _id: string;
@@ -52,6 +64,21 @@ export default function DashboardPage() {
     };
     fetchBlocks();
   }, [userId]);
+
+  const handleDelete = async (id: string) => {
+    if (!userId) return;
+    const res = await fetch(`/api/blocks/delete`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, userId }),
+    });
+    if (res.ok) {
+      setBlocks((prev) => prev.filter((b) => b._id !== id));
+    } else {
+      const data = await res.json().catch(() => null);
+      alert((data && data.error) || "Failed to delete block");
+    }
+  };
 
   return (
     <div className="p-8">
@@ -111,6 +138,31 @@ export default function DashboardPage() {
                   Duration: {block.duration} mins
                 </p>
               </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive hover:text-destructive"
+                    aria-label="Delete block"
+                    title="Delete"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete block?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDelete(block._id)}>Delete</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </li>
           ))}
         </ul>
