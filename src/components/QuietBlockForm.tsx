@@ -13,6 +13,7 @@ type Block = {
   endTime?: string | Date;
   duration: number;
   notified?: boolean;
+  timeZone?: string;
 };
 
 type QuietBlockFormProps = {
@@ -38,36 +39,26 @@ export default function QuietBlockForm({ onCreated }: QuietBlockFormProps) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-
     if (!userId || !userEmail) {
       setError("You must be logged in to create a block.");
       return;
     }
 
-    // Parse datetime-local correctly as local time
-    const [date, time] = startTime.split("T");
-    if (!date || !time) {
-      setError("Please provide a valid start time.");
-      return;
-    }
-
-    const [year, month, day] = date.split("-").map(Number);
-    const [hour, minute] = time.split(":").map(Number);
-
-    const parsed = new Date(year, month - 1, day, hour, minute);
-
+    const parsed = new Date(startTime);
     if (Number.isNaN(parsed.getTime())) {
       setError("Please provide a valid start time.");
       return;
     }
+
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     const payload = {
       startTime: parsed.toISOString(),
       duration,
       userId,
       userEmail,
+      timeZone,
     };
-
     try {
       const res = await fetch("/api/blocks/create", {
         method: "POST",
@@ -91,7 +82,6 @@ export default function QuietBlockForm({ onCreated }: QuietBlockFormProps) {
       setError("Network error. Please try again.");
     }
   };
-
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-4 border rounded-md">

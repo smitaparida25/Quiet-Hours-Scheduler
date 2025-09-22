@@ -25,6 +25,7 @@ type Block = {
   endTime?: string | Date;
   duration: number;
   notified?: boolean;
+  timeZone?: string;
 };
 
 // Shape returned by the API for a block document
@@ -34,6 +35,15 @@ type ApiBlock = Omit<Block, "_id"> & {
 
 function getStringId(id: string | { $oid: string }): string {
   return typeof id === "string" ? id : id.$oid;
+}
+
+function formatInZone(date: Date, zone?: string) {
+  const options: Intl.DateTimeFormatOptions = {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: zone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+  };
+  return new Intl.DateTimeFormat(undefined, options).format(date);
 }
 
 export default function DashboardPage() {
@@ -103,6 +113,7 @@ export default function DashboardPage() {
           endTime?: string | Date;
           duration: number;
           notified?: boolean;
+          timeZone?: string;
         }) => {
           setBlocks((prev) => {
             const normalized: Block = {
@@ -132,7 +143,7 @@ export default function DashboardPage() {
             >
               <div className="space-y-1">
                 <p className="font-medium">
-                  {new Date(block.startTime).toLocaleString()}
+                  {formatInZone(new Date(block.startTime), block.timeZone)}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Duration: {block.duration} mins

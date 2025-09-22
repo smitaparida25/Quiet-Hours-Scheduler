@@ -3,11 +3,12 @@ import clientPromise from "@/lib/mongodb";
 
 export async function POST(req: NextRequest) {
   try {
-    const { userEmail, startTime, duration, userId } = (await req.json()) as {
+    const { userEmail, startTime, duration, userId, timeZone } = (await req.json()) as {
       userEmail?: string
       startTime?: string
       duration?: number
       userId?: string
+      timeZone?: string
     };
 
     if (!startTime || !duration || !userId) {
@@ -31,16 +32,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Block overlaps with existing one" }, { status: 409 });
     }
 
-    const result = await blocks.insertOne({ userId, userEmail, startTime: start, endTime: end, duration, notified: false });
+    const doc = { userId, userEmail, startTime: start, endTime: end, duration, notified: false, timeZone } as const;
+    const result = await blocks.insertOne(doc);
 
     const createdBlock = {
       _id: result.insertedId,
-      userId,
-      userEmail,
-      startTime: start,
-      endTime: end,
-      duration,
-      notified: false,
+      ...doc,
     };
 
     return NextResponse.json({ message: "Block created successfully", block: createdBlock }, { status: 201 });

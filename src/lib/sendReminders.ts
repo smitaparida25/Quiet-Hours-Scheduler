@@ -21,6 +21,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 }
 
+function formatInZone(date: Date, zone?: string) {
+    const options: Intl.DateTimeFormatOptions = {
+        dateStyle: "medium",
+        timeStyle: "short",
+        timeZone: zone,
+    };
+    return new Intl.DateTimeFormat(undefined, options).format(date);
+}
+
 export async function sendReminderEmails() {
     const client = await clientPromise;
     const db = client.db('quiet-hours-scheduler');
@@ -50,11 +59,12 @@ export async function sendReminderEmails() {
 
     for (const block of upcomingBlocks) {
         try {
+            const when = formatInZone(new Date(block.startTime), (block as any).timeZone);
             await transporter.sendMail({
                 from: process.env.EMAIL_USER,
-                to: block.userEmail,
+                to: (block as any).userEmail,
                 subject: 'Your Quiet Block is Starting Soon',
-                text: `Hey! Your quiet block starts at ${new Date(block.startTime).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}.`
+                text: `Hey! Your quiet block starts at ${when}.`
             });
 
             await blocks.updateOne(
@@ -64,7 +74,7 @@ export async function sendReminderEmails() {
             result.sent += 1;
         } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
-            result.errors.push(`Failed for ${block.userEmail}: ${message}`);
+            result.errors.push(`Failed for ${(block as any).userEmail}: ${message}`);
         }
     }
 
