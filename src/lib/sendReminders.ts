@@ -54,7 +54,7 @@ export async function sendReminderEmails() {
                 from: process.env.EMAIL_USER,
                 to: block.userEmail,
                 subject: 'Your Quiet Block is Starting Soon',
-                text: `Hey! Your quiet block starts at ${new Date(block.startTime).toLocaleTimeString()}.`
+                text: `Hey! Your quiet block starts at ${new Date(block.startTime).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}.`
             });
 
             await blocks.updateOne(
