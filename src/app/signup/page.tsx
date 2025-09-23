@@ -23,8 +23,10 @@ const handleSignup = async (e: React.FormEvent) => {
     setError("Please enter a valid email and password (6+ chars).");
     return;
   }
-
+  
   const siteUrlEnv = process.env.NEXT_PUBLIC_SITE_URL;
+  console.log("DEBUG: NEXT_PUBLIC_SITE_URL:", siteUrlEnv);
+  console.log("DEBUG: window.location.origin:", typeof window !== "undefined" ? window.location.origin : undefined);
   const runtimeOrigin = typeof window !== "undefined" ? window.location.origin : undefined;
   const baseUrl = siteUrlEnv || runtimeOrigin;
   const emailRedirectTo = baseUrl ? `${baseUrl}/login` : undefined;
